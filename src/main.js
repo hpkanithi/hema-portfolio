@@ -84,18 +84,36 @@ document.querySelector('#app').innerHTML = `
           <article class="info-card">
             <h3>AWS Receipt Processing System</h3>
             <p class="card-subtitle">S3 · Textract · Lambda · DynamoDB · SNS/SES · QuickSight</p>
-            <p>
-              Built a serverless workflow for receipt upload, text extraction,
-              storage, notification, and dashboard visualization.
+
+            <p class="project-summary">
+              Built a serverless receipt-processing workflow that extracts receipt data,
+              stores structured records, sends notifications, and supports dashboard-based
+              spending insights.
             </p>
+
+            <ul class="card-list-points">
+              <li>Designed an event-driven pipeline where receipts uploaded to Amazon S3 trigger downstream processing.</li>
+              <li>Used AWS Textract to extract structured receipt information for automated data capture.</li>
+              <li>Processed and stored receipt metadata using AWS Lambda and DynamoDB for scalable, serverless handling.</li>
+              <li>Integrated SNS/SES notifications and QuickSight dashboards to enable visibility and expense tracking.</li>
+            </ul>
           </article>
 
           <article class="info-card">
-            <h3>Future Project Placeholder</h3>
-            <p class="card-subtitle">Add another project here</p>
-            <p>
-              This can later hold another AWS or cloud-focused project once we expand the portfolio.
+            <h3>Data Migration Pipeline</h3>
+            <p class="card-subtitle">EC2 · ECS · Lambda · MWAA · Terraform · DynamoDB · RDS</p>
+
+            <p class="project-summary">
+              Worked on cloud-based data migration workflows with orchestration, monitoring,
+              and database validation across AWS services.
             </p>
+
+            <ul class="card-list-points">
+              <li>Designed and supported orchestration workflows using AWS Managed Workflows for Apache Airflow (MWAA).</li>
+              <li>Used Terraform to provision and manage cloud resources for data flow execution.</li>
+              <li>Supported monitoring and validation of migrated data using DynamoDB and Amazon RDS.</li>
+              <li>Leveraged AWS Lambda for automation and cost-optimized workflow execution.</li>
+            </ul>
           </article>
         </div>
       </div>

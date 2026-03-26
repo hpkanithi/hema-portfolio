@@ -124,6 +124,12 @@ h3 {
   font-size: 1.05rem;
 }
 
+.project-summary {
+  margin-bottom: 1rem;
+  color: #cbd5e1;
+  max-width: 760px;
+}
+
 .hero-actions {
   display: flex;
   gap: 1rem;
@@ -188,13 +194,18 @@ h3 {
   transition: transform 0.2s ease, border 0.2s ease;
 }
 
+.info-card:first-child {
+  border: 1px solid rgba(59, 130, 246, 0.5);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
+}
+
 .info-card:hover {
   transform: translateY(-5px);
   border-color: rgba(148, 163, 184, 0.35);
 }
 
 .card-subtitle {
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
   color: #94a3b8;
   font-size: 0.95rem;
 }
