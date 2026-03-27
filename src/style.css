@@ -149,14 +149,17 @@ h3 {
   transform: translateY(-2px);
 }
 
-.primary-button {
-  background: #2563eb;
-  color: #ffffff;
-}
-
+.primary-button,
 .secondary-button {
   border: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.08);
   color: #e2e8f0;
+  background: transparent;
+}
+
+.primary-button:hover,
+.secondary-button:hover {
+  background: rgba(148, 163, 184, 0.1);
 }
 
 .hero-visual {
@@ -255,3 +258,45 @@ h3 {
     font-size: 2.5rem;
   }
 }
+
+.contact-content {
+  max-width: 900px;
+}
+
+.contact-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.contact-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.95rem 1.25rem;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.65);
+  color: #e2e8f0;
+  text-decoration: none;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.contact-button:hover .contact-icon {
+  background: rgba(59, 130, 246, 0.35);
+}
+
+.contact-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(59, 130, 246, 0.18);
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
