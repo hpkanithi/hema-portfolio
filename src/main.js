@@ -141,7 +141,7 @@ document.querySelector('#app').innerHTML = `
           </a>
 
           <a
-            href="https://www.linkedin.com/in/hema-praharsha-kanithi/"
+            href="https://www.linkedin.com/in/hema-praharsha-kanithi-100aa1287/"
             target="_blank"
             rel="noopener noreferrer"
             class="contact-button"
