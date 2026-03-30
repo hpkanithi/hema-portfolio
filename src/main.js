@@ -32,9 +32,7 @@ document.querySelector('#app').innerHTML = `
         </div>
 
         <div class="hero-visual">
-          <div class="image-placeholder">
-            Ghibli-style image<br />goes here later
-          </div>
+          <img src="/assets/profile.jpeg" alt="Hema Praharsha" class="hero-image" />
         </div>
       </div>
     </section>
