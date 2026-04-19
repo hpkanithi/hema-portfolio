@@ -84,6 +84,30 @@ document.querySelector('#app').innerHTML = `
         <p class="eyebrow">Projects</p>
         <h2>Featured Projects</h2>
         <div class="card-list">
+          <article class="info-card featured-project">
+            <h3>Multi-Region AWS SaaS Platform</h3>
+            <p class="card-subtitle">Terraform · ECS Fargate · ALB · GitHub Actions · CloudWatch · Docker</p>
+
+            <p class="project-summary">
+              Designed and deployed a production-grade multi-region AWS architecture using Terraform,
+              featuring ECS Fargate, environment-aware CI/CD pipelines with approval gates, CloudWatch monitoring,
+              and disaster recovery support across regions.
+            </p>
+
+            <ul class="card-list-points">
+              <li>Designed a multi-region deployment model with primary and disaster recovery environments.</li>
+              <li>Built separate CI/CD pipelines for application and infrastructure delivery using GitHub Actions.</li>
+              <li>Implemented approval-gated infrastructure changes for safer and controlled deployments.</li>
+              <li>Deployed containerized workloads on ECS Fargate behind an Application Load Balancer.</li>
+              <li>Integrated CloudWatch alarms for ECS utilization and load balancer health monitoring.</li>
+              <li>Configured remote Terraform state management using S3 and DynamoDB.</li>
+            </ul>
+
+            <div class="project-links">
+              <a href="https://github.com/hpkanithi/aws-multi-region-saas" target="_blank" rel="noopener noreferrer">View GitHub</a>
+            </div>
+          </article>
+
           <article class="info-card">
             <h3>AWS Receipt Processing System</h3>
             <p class="card-subtitle">S3 · Textract · Lambda · DynamoDB · SNS/SES · QuickSight</p>
