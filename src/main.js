@@ -104,7 +104,7 @@ document.querySelector('#app').innerHTML = `
             </ul>
 
             <div class="project-links">
-              <a href="https://github.com/hpkanithi/aws-multi-region-saas" target="_blank" rel="noopener noreferrer">View GitHub</a>
+              <a href="https://github.com/hpkanithi/aws-multi-region-saas" target="_blank" rel="noopener noreferrer">View Project Code</a>
             </div>
           </article>
 
@@ -127,20 +127,21 @@ document.querySelector('#app').innerHTML = `
           </article>
 
           <article class="info-card">
-            <h3>Data Migration Pipeline</h3>
-            <p class="card-subtitle">EC2 · ECS · Lambda · MWAA · Terraform · DynamoDB · RDS</p>
+            <h3>Federated Learning for Privacy-Preserving Healthcare AI</h3>
+            <p class="card-subtitle">Python · Machine Learning · Distributed Systems · Data Privacy</p>
 
             <p class="project-summary">
-              Worked on cloud-based data migration workflows with orchestration, monitoring,
-              and database validation across AWS services.
+              Designed and implemented a federated learning framework to train machine learning models across distributed healthcare datasets without sharing sensitive patient data.
             </p>
 
             <ul class="card-list-points">
-              <li>Designed and supported orchestration workflows using AWS Managed Workflows for Apache Airflow (MWAA).</li>
-              <li>Used Terraform to provision and manage cloud resources for data flow execution.</li>
-              <li>Supported monitoring and validation of migrated data using DynamoDB and Amazon RDS.</li>
-              <li>Leveraged AWS Lambda for automation and cost-optimized workflow execution.</li>
+              <li>Simulated multiple hospital environments by partitioning datasets for decentralized training under real-world privacy constraints.</li>
+              <li>Built and evaluated centralized vs federated models (Logistic Regression, LSTM, CNN/ResNet) to compare accuracy and efficiency.</li>
+              <li>Implemented Federated Averaging (FedAvg) for secure aggregation of local model updates across distributed nodes.</li>
+              <li>Analyzed model performance under non-IID data distributions reflecting real-world healthcare variability.</li>
+              <li>Optimized distributed training workflows to improve scalability and communication efficiency.</li>
             </ul>
+            </div>
           </article>
         </div>
       </div>
