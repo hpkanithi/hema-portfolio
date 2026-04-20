@@ -140,6 +140,9 @@ document.querySelector('#app').innerHTML = `
               <li>Implemented Federated Averaging (FedAvg) for secure aggregation of local model updates across distributed nodes.</li>
               <li>Analyzed model performance under non-IID data distributions reflecting real-world healthcare variability.</li>
               <li>Optimized distributed training workflows to improve scalability and communication efficiency.</li>
+              <div class="project-links">
+                <a href="https://github.com/hpkanithi/federated-learning-healthcare" target="_blank" rel="noopener noreferrer">View Project Code</a>
+              </div>
             </ul>
             </div>
           </article>
