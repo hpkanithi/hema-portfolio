@@ -160,7 +160,7 @@ document.querySelector('#app').innerHTML = `
 
         <div class="contact-actions">
           <a
-            href="mailto:hemaprahrsha.k@gmail.com"
+            href="mailto:hemapraharsha.k@gmail.com"
             class="contact-button"
             aria-label="Email"
           >
