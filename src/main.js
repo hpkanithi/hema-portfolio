@@ -43,36 +43,40 @@ document.querySelector('#app').innerHTML = `
         <h2>Professional Experience</h2>
         <div class="card-list">
           <article class="info-card">
-            <h3>Senior DevOps Engineer</h3>
+            <h3>Senior Cloud Engineer</h3>
             <p class="card-subtitle">CVS Health · Jan 2025 – Present</p>
 
             <ul class="card-list-points">
               <li>Automated cloud infrastructure using Terraform and CI/CD pipelines (Jenkins, GitLab) across AWS and Azure environments.</li>
               <li>Containerized and orchestrated applications using Docker and Kubernetes (EKS, OpenShift), improving scalability and deployment efficiency.</li>
-              <li>Developed automation scripts in Python, Bash, and PowerShell for deployments, monitoring, and security workflows.</li>
+              // <li>Developed automation scripts in Python, Bash, and PowerShell for deployments, monitoring, and security workflows.</li>
               <li>Integrated monitoring and observability using Prometheus, Grafana, and Splunk to ensure system reliability and performance.</li>
               <li>Implemented secure infrastructure practices using HashiCorp Vault and Terraform Sentinel for compliance and policy enforcement.</li>
             </ul>
           </article>
 
           <article class="info-card">
-            <h3>AWS Senior Developer</h3>
-            <p class="card-subtitle">Accenture · Oct 2022 - Jan 2024</p>
+            <h3>AWS Cloud Engineer</h3>
+            <p class="card-subtitle">Accenture Solutions Pvt. Ltd. · Oct 2022 – Jan 2024</p>
+
             <ul class="card-list-points">
-              <li>Managed AWS DevOps tasks, production deployments, and regression testing with post - GoLive hypercare support</li>
-              <li>Built and maintained AWS environments using Terraform, leveraging AWS Lambda, Datasync, and Transfer Family.</li>
-              <li>Designed scalable data pipelines with MWAA, integrated monitoring with CloudWatch dashboards for improved system visibility.</li>
-              <li>Worked with AWS databases including DynamoDB, RDS, and PostgreSQL (pgAdmin) to support reliable and scalable data storage solutions.</li>
+              <li>Architected an AWS migration platform supporting 50+ TB of data across 20+ workloads.</li>
+              <li>Built reusable Terraform modules for VPC, IAM, ECS, MWAA, and multi-environment deployments.</li>
+              <li>Designed serverless workflows using Lambda, DynamoDB, SNS, CloudWatch, and Parameter Store.</li>
+              <li>Implemented secure hybrid-cloud migrations using DataSync, Transfer Family, S3, and VPN.</li>
+              <li>Automated application deployments using Terraform, Docker, ECR, and ECS.</li>
             </ul>
           </article>
 
           <article class="info-card">
-            <h3>AWS Application Developer</h3>
-            <p class="card-subtitle">Amazon · Sept 2021 – May 2022</p>
+            <h3>Software Engineer II</h3>
+            <p class="card-subtitle">Amazon India Pvt. Ltd. · Sept 2021 – May 2022</p>
+
             <ul class="card-list-points">
-              <li>Built and deployed applications on AWS using EC2, S3, IAM, and RDS.</li>
-              <li>Automated CI/CD pipelines with Jenkins and Git, improving deployment consistency.</li>
-              <li>Monitored system performance using CloudWatch and supported application deployments on Tomcat.</li>
+              <li>Supported mission-critical Amazon Go platforms, troubleshooting production software and device incidents.</li>
+              <li>Performed log analysis and root cause analysis to identify defects and restore service availability.</li>
+              <li>Improved SOPs and operational runbooks, reducing incident resolution time.</li>
+              <li>Delivered technical guidance and knowledge transfer on production support workflows.</li>
             </ul>
           </article>
         </div>
