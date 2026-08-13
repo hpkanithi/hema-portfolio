@@ -201,7 +201,7 @@ document.querySelector("#app").innerHTML = `
 
               <div class="architecture-links">
                 <a
-                  href="/company1.html"
+                  href="/company1"
                   class="button secondary-button"
                 >
                   Read Full Article
