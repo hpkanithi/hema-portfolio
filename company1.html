@@ -1,0 +1,865 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <meta
+      name="description"
+      content="Architecture Breakdown Company 01: rebuilding Slack's durable job queue pattern on AWS using Terraform, ECS, SQS, Redis, DLQ, and CloudWatch."
+    />
+
+    <title>Company 01 — Slack Job Queue Architecture Breakdown</title>
+
+    <!-- Existing portfolio styles -->
+    <link rel="stylesheet" href="/src/style.css" />
+
+    <!-- Blog-specific styles -->
+    <link rel="stylesheet" href="/company1.css" />
+  </head>
+
+  <body>
+    <header class="site-header">
+      <div class="logo">
+        <a href="/" style="text-decoration: none; color: inherit"> Hema </a>
+      </div>
+
+      <nav class="nav">
+        <a href="/#intro">Intro</a>
+        <a href="/#experience">Experience</a>
+        <a href="/#projects">Projects</a>
+        <a href="/#architecture-breakdown">Architecture</a>
+        <a href="/#contact">Contact</a>
+      </nav>
+    </header>
+
+    <main>
+      <article class="article">
+        <section class="article-hero">
+          <div class="series-kicker">
+            <span class="series-dot"></span>
+            ARCHITECTURE BREAKDOWN · COMPANY 01
+          </div>
+
+          <h1>Building Slack's Job Queue Pattern, on a $5 AWS Bill</h1>
+
+          <p class="hero-summary">
+            Slack's original Redis-backed job queue hit a failure mode where
+            memory pressure stopped both enqueue and dequeue operations. I
+            rebuilt the durable-buffer pattern they adopted afterward, scaled
+            down for a personal AWS environment.
+          </p>
+
+          <div class="tag-row">
+            <span>AWS</span>
+            <span>Terraform</span>
+            <span>ECS</span>
+            <span>SQS</span>
+            <span>Redis</span>
+            <span>CloudWatch</span>
+          </div>
+
+          <div class="hero-meta">
+            <span>Company 01 / Slack</span>
+
+            <span class="meta-divider"></span>
+
+            <span> Architecture · Infrastructure · Failure Testing </span>
+          </div>
+        </section>
+
+        <section class="quick-summary">
+          <div class="summary-label">QUICK SUMMARY</div>
+
+          <p>
+            In 2016, Slack's job queue deadlocked because its only storage was
+            memory-limited Redis, and removing a job required a little memory it
+            no longer had. Slack fixed the design by putting Kafka in front of
+            Redis as a durable, disk-backed buffer. I rebuilt that same pattern
+            small: a web service enqueues to SQS, a worker processes the queue
+            and writes to Redis, and killing the worker delays messages instead
+            of losing them.
+          </p>
+        </section>
+
+        <section class="content-section" id="problem">
+          <div class="section-heading">
+            <span class="section-number"> 01 </span>
+
+            <div>
+              <p class="eyebrow">THE FAILURE</p>
+
+              <h2>The production problem</h2>
+            </div>
+          </div>
+
+          <p>
+            In 2016, a database slowdown made Slack workers dequeue more slowly
+            than the web application could enqueue. Redis kept filling until it
+            exhausted its available memory.
+          </p>
+
+          <p>
+            The interesting failure was what happened next: dequeuing itself
+            required a small memory allocation. Once Redis had no memory left,
+            the queue could not reliably remove old jobs to free space.
+          </p>
+
+          <aside class="callout">
+            <span class="callout-label"> CORE FAILURE MODE </span>
+
+            <strong>
+              Memory pressure did not just slow the queue — it prevented the
+              queue from recovering itself.
+            </strong>
+          </aside>
+
+          <p>
+            This project is part of a portfolio series where I rebuild patterns
+            from publicly documented company architectures at a scale I can
+            realistically run myself.
+          </p>
+
+          <p class="disclaimer">
+            This is a reverse-engineering exercise based on publicly available
+            engineering material. It does not claim to represent Slack's current
+            production implementation.
+          </p>
+        </section>
+
+        <section class="content-section" id="slack">
+          <div class="section-heading">
+            <span class="section-number"> 02 </span>
+
+            <div>
+              <p class="eyebrow">THE ORIGINAL PATTERN</p>
+
+              <h2>What Slack built</h2>
+            </div>
+          </div>
+
+          <p>
+            Slack's asynchronous job system handled work that did not belong
+            inside the web request path, such as push notifications, link
+            unfurls, and search-index updates.
+          </p>
+
+          <p>
+            The original queue ran entirely on Redis and eventually hit the
+            deadlock described above.
+          </p>
+
+          <p>
+            The redesign did not simply remove Redis. Slack placed Kafka in
+            front of it as durable buffering, with small services moving jobs
+            between Kafka, Redis, and the existing worker fleet. The
+            architectural change separated durable ingestion from the in-memory
+            queue used by workers.
+          </p>
+
+          <div class="source-links">
+            <a
+              href="https://slack.engineering/scaling-slacks-job-queue/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Scaling Slack's Job Queue ↗
+            </a>
+
+            <a
+              href="https://slack.engineering/building-the-next-evolution-of-cloud-networks-at-slack/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Slack Whitecastle ↗
+            </a>
+          </div>
+        </section>
+
+        <section class="content-section" id="architecture">
+          <div class="section-heading">
+            <span class="section-number"> 03 </span>
+
+            <div>
+              <p class="eyebrow">MY AWS RECREATION</p>
+
+              <h2>The pattern, scaled down</h2>
+            </div>
+          </div>
+
+          <p>
+            I am not trying to reproduce Slack's fleet size. I am reproducing
+            the behavior: accept work quickly, place a durable buffer between
+            producers and consumers, and allow workers to disappear temporarily
+            without losing queued work.
+          </p>
+
+          <figure class="architecture-figure">
+            <div class="figure-topline">
+              <span> COMPANY 01 / SYSTEM DIAGRAM </span>
+
+              <span> AWS · TWO AZs </span>
+            </div>
+
+            <img
+              src="/assets/architecture/slack/architecture-diagram.svg"
+              alt="AWS recreation of Slack's durable job queue architecture"
+            />
+
+            <figcaption>
+              Request path: ALB → ECS Web Service → SQS → ECS Worker →
+              ElastiCache Redis. A dead-letter queue isolates repeatedly failing
+              messages while CloudWatch monitors failure conditions.
+            </figcaption>
+          </figure>
+
+          <div class="flow-card">
+            <div class="flow-step">
+              <span class="flow-index"> 1 </span>
+
+              <div>
+                <strong> Request arrives </strong>
+
+                <code> POST /message </code>
+              </div>
+            </div>
+
+            <span class="flow-arrow"> → </span>
+
+            <div class="flow-step">
+              <span class="flow-index"> 2 </span>
+
+              <div>
+                <strong> Web service returns fast </strong>
+
+                <code> ECS → SQS </code>
+              </div>
+            </div>
+
+            <span class="flow-arrow"> → </span>
+
+            <div class="flow-step">
+              <span class="flow-index"> 3 </span>
+
+              <div>
+                <strong> Worker consumes </strong>
+
+                <code> SQS → ECS Worker </code>
+              </div>
+            </div>
+
+            <span class="flow-arrow"> → </span>
+
+            <div class="flow-step">
+              <span class="flow-index"> 4 </span>
+
+              <div>
+                <strong> Result stored </strong>
+
+                <code> ElastiCache Redis </code>
+              </div>
+            </div>
+          </div>
+
+          <div class="comparison-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Slack production</th>
+
+                  <th>What I built</th>
+
+                  <th>Why</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <tr>
+                  <td>EC2 fleet running the web application</td>
+
+                  <td>ECS on EC2 web service</td>
+
+                  <td>Same compute shape at a much smaller scale.</td>
+                </tr>
+
+                <tr>
+                  <td>Kafka + Kafkagate</td>
+
+                  <td>SQS + Dead-Letter Queue</td>
+
+                  <td>
+                    Managed durable buffering without operating a Kafka cluster.
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>Redis job queue</td>
+
+                  <td>ElastiCache Redis</td>
+
+                  <td>Workers store processed results in Redis.</td>
+                </tr>
+
+                <tr>
+                  <td>JQRelay + workers</td>
+
+                  <td>ECS worker service polling SQS</td>
+
+                  <td>Same consumer responsibility at portfolio scale.</td>
+                </tr>
+
+                <tr>
+                  <td>Whitecastle multi-VPC networking</td>
+
+                  <td>One VPC across two Availability Zones</td>
+
+                  <td>
+                    Enough networking complexity to preserve the architectural
+                    lesson.
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>Cell-based AZ isolation</td>
+
+                  <td>Not implemented</td>
+
+                  <td>
+                    Important production pattern but outside this project's
+                    scope.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="content-section" id="decisions">
+          <div class="section-heading">
+            <span class="section-number"> 04 </span>
+
+            <div>
+              <p class="eyebrow">TRADEOFFS</p>
+
+              <h2>Choices I made on purpose</h2>
+            </div>
+          </div>
+
+          <div class="decision-grid">
+            <article class="decision-card">
+              <span class="decision-tag"> QUEUE </span>
+
+              <h3>SQS instead of Kafka</h3>
+
+              <p>
+                Kafka would be operationally excessive for this workload. SQS
+                provides the durable buffering behavior I need without
+                introducing a distributed broker simply because it sounds more
+                impressive.
+              </p>
+            </article>
+
+            <article class="decision-card">
+              <span class="decision-tag"> COMPUTE </span>
+
+              <h3>ECS on EC2 instead of Fargate</h3>
+
+              <p>
+                I chose the harder path deliberately: launch templates, an Auto
+                Scaling Group, and an ECS capacity provider rather than
+                delegating the compute layer entirely to Fargate.
+              </p>
+            </article>
+
+            <article class="decision-card">
+              <span class="decision-tag"> NETWORKING </span>
+
+              <h3>One NAT Gateway</h3>
+
+              <p>
+                This is a deliberate cost tradeoff. A production design would
+                normally avoid making egress dependent on a single NAT Gateway,
+                but that level of redundancy is difficult to justify for a
+                temporary portfolio environment.
+              </p>
+            </article>
+
+            <article class="decision-card">
+              <span class="decision-tag"> FAILURE HANDLING </span>
+
+              <h3>DLQ from the first apply</h3>
+
+              <p>
+                Poison messages are expected failure cases in queue consumers.
+                The worker can receive and delete from the queue, while the web
+                task can only send to it, keeping IAM responsibilities
+                separated.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section class="content-section" id="failures">
+          <div class="section-heading">
+            <span class="section-number">05</span>
+
+            <div>
+              <p class="eyebrow">PROVING THE DESIGN</p>
+              <h2>Failure testing</h2>
+            </div>
+          </div>
+
+          <div class="failure-test-header">
+            <span class="test-label">TEST 01</span>
+            <h3>Kill the worker</h3>
+
+            <p>
+              I scaled the ECS worker service to zero, then posted twenty
+              messages. With no consumer available, the requests still returned
+              successfully and the messages accumulated safely in SQS instead of
+              disappearing.
+            </p>
+          </div>
+
+          <!-- Worker 0/0 → 20 POSTs → Queue 20 -->
+
+          <div class="failure-evidence-grid three-column">
+            <figure class="failure-evidence-card">
+              <div class="failure-image queue-depth-image">
+                <img
+                  src="/assets/architecture/slack/shot-worker-scaled-to-zero.png"
+                  alt="ECS worker service scaled to zero"
+                />
+              </div>
+
+              <figcaption>
+                <span class="evidence-step">01</span>
+
+                <div>
+                  <strong>Worker = 0/0</strong>
+                  <p>ECS worker service intentionally scaled to zero.</p>
+                </div>
+              </figcaption>
+            </figure>
+
+            <figure class="failure-evidence-card">
+              <div class="failure-image">
+                <img
+                  src="/assets/architecture/slack/shot-20-messages-posted.png"
+                  alt="Twenty messages submitted while the worker was unavailable"
+                />
+              </div>
+
+              <figcaption>
+                <span class="evidence-step">02</span>
+
+                <div>
+                  <strong>20 POSTs queued</strong>
+                  <p>
+                    All twenty requests return with status <code>queued</code>.
+                  </p>
+                </div>
+              </figcaption>
+            </figure>
+
+            <figure class="failure-evidence-card">
+              <div class="failure-image">
+                <img
+                  src="/assets/architecture/slack/shot-queue-depth-20.png"
+                  alt="SQS queue depth showing twenty messages"
+                />
+              </div>
+
+              <figcaption>
+                <span class="evidence-step">03</span>
+
+                <div>
+                  <strong>Queue = 20</strong>
+                  <p>The full backlog remains durably stored in SQS.</p>
+                </div>
+              </figcaption>
+            </figure>
+          </div>
+
+          <!-- =========================================
+       RESTORE WORKER
+       ========================================= -->
+
+          <div class="failure-stage-heading">
+            <span>RECOVERY</span>
+            <h3>Restore the worker</h3>
+
+            <p>
+              I brought the worker service back online. As processing resumed,
+              the queue depth dropped progressively from 20 to zero.
+            </p>
+          </div>
+
+          <!-- Depth 13 → 4 → 0 -->
+
+          <div class="failure-evidence-grid three-column">
+            <figure class="failure-evidence-card">
+              <div class="failure-evidence-grid three-column recovery-grid">
+                <img
+                  src="/assets/architecture/slack/shot-queue-depth-13.png"
+                  alt="SQS queue depth reduced to thirteen"
+                />
+              </div>
+
+              <figcaption>
+                <span class="evidence-step">01</span>
+
+                <div>
+                  <strong>Depth = 13</strong>
+                  <p>Worker recovery begins draining the backlog.</p>
+                </div>
+              </figcaption>
+            </figure>
+
+            <figure class="failure-evidence-card">
+              <div class="failure-evidence-grid three-column recovery-grid">
+                <img
+                  src="/assets/architecture/slack/shot-queue-depth-4.png"
+                  alt="SQS queue depth reduced to four"
+                />
+              </div>
+
+              <figcaption>
+                <span class="evidence-step">02</span>
+
+                <div>
+                  <strong>Depth = 4</strong>
+                  <p>The consumer continues processing queued work.</p>
+                </div>
+              </figcaption>
+            </figure>
+
+            <figure class="failure-evidence-card">
+              <div class="failure-evidence-grid three-column recovery-grid">
+                <img
+                  src="/assets/architecture/slack/shot-queue-depth-0.png"
+                  alt="SQS queue depth returned to zero"
+                />
+              </div>
+
+              <figcaption>
+                <span class="evidence-step">03</span>
+
+                <div>
+                  <strong>Depth = 0</strong>
+                  <p>The complete backlog has been processed.</p>
+                </div>
+              </figcaption>
+            </figure>
+          </div>
+
+          <!-- =========================================
+       GET /messages validation
+       ========================================= -->
+
+          <div class="failure-stage-heading">
+            <span>VALIDATION</span>
+            <h3>Verify the messages survived</h3>
+
+            <p>
+              A drained queue alone does not prove successful processing. I
+              queried the application afterward to confirm that the messages
+              reached the downstream store successfully.
+            </p>
+          </div>
+
+          <figure class="failure-evidence-card failure-evidence-wide">
+            <div class="failure-image wide-image">
+              <img
+                src="/assets/architecture/slack/shot-get-messages.png"
+                alt="GET messages output showing twenty-one processed messages"
+              />
+            </div>
+
+            <figcaption>
+              <span class="evidence-step">✓</span>
+
+              <div>
+                <strong>GET /messages — Count: 21</strong>
+                <p>
+                  Every returned message shows
+                  <code>processed: true</code>.
+                </p>
+              </div>
+            </figcaption>
+          </figure>
+
+          <!-- =========================================
+       TEST 02 — POISON MESSAGE
+       ========================================= -->
+
+          <div class="failure-test-header second-test">
+            <span class="test-label">TEST 02</span>
+            <h3>Poison message</h3>
+
+            <p>
+              Next I intentionally submitted a message the worker was designed
+              to reject. Rather than allowing an infinite retry loop, SQS
+              redelivered the message three times before moving it into the
+              dead-letter queue.
+            </p>
+          </div>
+
+          <!-- Retries → DLQ -->
+
+          <div class="failure-evidence-grid two-column">
+            <figure class="failure-evidence-card">
+              <div class="failure-image">
+                <img
+                  src="/assets/architecture/slack/shot-worker-retry-logs.png"
+                  alt="Worker logs showing repeated poison message failures"
+                />
+              </div>
+
+              <figcaption>
+                <span class="evidence-step">01</span>
+
+                <div>
+                  <strong>Three retry attempts</strong>
+                  <p>The worker repeatedly rejects the same poison message.</p>
+                </div>
+              </figcaption>
+            </figure>
+
+            <figure class="failure-evidence-card">
+              <div class="failure-image">
+                <img
+                  src="/assets/architecture/slack/shot-dlq-depth-1.png"
+                  alt="Dead-letter queue showing one failed poison message"
+                />
+              </div>
+
+              <figcaption>
+                <span class="evidence-step">02</span>
+
+                <div>
+                  <strong>DLQ depth = 1</strong>
+                  <p>
+                    After the retry threshold is reached, the failed message is
+                    isolated in the dead-letter queue.
+                  </p>
+                </div>
+              </figcaption>
+            </figure>
+          </div>
+
+          <aside class="callout failure-result">
+            <span class="callout-label">RESULT</span>
+
+            <strong>
+              Worker downtime created backlog, not data loss. Recovery drained
+              that backlog successfully, while poison messages were isolated
+              instead of retrying forever.
+            </strong>
+          </aside>
+        </section>
+
+        <section class="content-section" id="broken">
+          <div class="section-heading">
+            <span class="section-number"> 06 </span>
+
+            <div>
+              <p class="eyebrow">REAL BUILD PROBLEMS</p>
+
+              <h2>What actually broke</h2>
+            </div>
+          </div>
+
+          <div class="incident-card">
+            <div class="incident-header">
+              <span class="incident-number"> 01 </span>
+
+              <div>
+                <span class="incident-type"> CONTAINER ARCHITECTURE </span>
+
+                <h3>ARM64 image mismatch</h3>
+              </div>
+            </div>
+
+            <p>
+              The ECS instances use Graviton, while my laptop initially built
+              the Docker image for its own architecture.
+            </p>
+
+            <pre><code>CannotPullContainerError:
+no matching manifest for linux/arm64/v8</code></pre>
+
+            <p>
+              A plain
+              <code>docker build --platform linux/arm64</code>
+              still did not solve the issue in my local setup. Building through
+              a real multi-platform
+              <code>buildx</code>
+              builder and pushing from that build path produced the correct
+              image.
+            </p>
+          </div>
+
+          <div class="incident-card">
+            <div class="incident-header">
+              <span class="incident-number"> 02 </span>
+
+              <div>
+                <span class="incident-type"> ECS DEPLOYMENT </span>
+
+                <h3>RESOURCE:ENI during rolling deployment</h3>
+              </div>
+            </div>
+
+            <p>
+              My Auto Scaling Group had exactly enough capacity for the running
+              tasks and no spare room for a normal rolling update.
+            </p>
+
+            <p>
+              ECS attempted to start a replacement task before stopping the old
+              one and could not allocate the required ENI.
+            </p>
+
+            <pre><code>deployment_maximum_percent         = 100
+deployment_minimum_healthy_percent = 0
+availability_zone_rebalancing      = "DISABLED"</code></pre>
+
+            <p>
+              The deployment strategy now replaces tasks one-for-one instead of
+              requiring temporary capacity for both generations.
+            </p>
+          </div>
+        </section>
+
+        <section class="content-section" id="scale">
+          <div class="section-heading">
+            <span class="section-number"> 07 </span>
+
+            <div>
+              <p class="eyebrow">LIMITS</p>
+
+              <h2>Where this falls apart at Slack scale</h2>
+            </div>
+          </div>
+
+          <p>The architecture pattern transfers. The sizing does not.</p>
+
+          <p>
+            A personal AWS account, a small ECS cluster, one VPC, and one NAT
+            Gateway are intentionally nowhere near Slack's operating scale.
+          </p>
+
+          <div class="limits-list">
+            <div>
+              <span> 01 </span>
+
+              <p>
+                A tiny ECS Auto Scaling Group cannot absorb real Slack-scale
+                traffic.
+              </p>
+            </div>
+
+            <div>
+              <span> 02 </span>
+
+              <p>
+                A single SQS-based design would require significant rethinking,
+                partitioning, or a broker architecture suited to sustained
+                massive parallelism.
+              </p>
+            </div>
+
+            <div>
+              <span> 03 </span>
+
+              <p>
+                One NAT Gateway creates an availability tradeoff that would not
+                be acceptable in a serious production design.
+              </p>
+            </div>
+
+            <div>
+              <span> 04 </span>
+
+              <p>This build has no multi-region or cell-isolation story.</p>
+            </div>
+          </div>
+
+          <aside class="callout">
+            <span class="callout-label"> THE REUSABLE LESSON </span>
+
+            <strong>
+              Durable buffering isolates request-time producers from slower or
+              temporarily unavailable workers. Infrastructure sizing is a
+              separate decision driven by actual load.
+            </strong>
+          </aside>
+        </section>
+
+        <section class="content-section final-section" id="try">
+          <div class="section-heading">
+            <span class="section-number"> 08 </span>
+
+            <div>
+              <p class="eyebrow">REPRODUCE IT</p>
+
+              <h2>Try it yourself</h2>
+            </div>
+          </div>
+
+          <p>
+            The entire environment is provisioned with Terraform. The most
+            useful test is simple: stop the worker service, send messages,
+            confirm that SQS retains them, restore the worker, and watch the
+            backlog drain.
+          </p>
+
+          <p class="repro-stat">
+            <strong>Timed run:</strong>
+            ~4 minutes to provision the stack with
+            <code>terraform apply</code>. My recorded destroy took ~13 minutes
+            because a stale Terraform state lock had to be cleared with
+            <code>terraform force-unlock</code>.
+          </p>
+
+          <div class="terminal-card">
+            <div class="terminal-top">
+              <span></span>
+              <span></span>
+              <span></span>
+
+              <small> terraform </small>
+            </div>
+
+            <pre><code>$ terraform apply
+$ # run the worker failure drill
+$ terraform destroy</code></pre>
+          </div>
+
+          <div class="article-actions">
+            <a
+              class="button primary"
+              href="https://github.com/hpkanithi/slack-style-infra"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View source on GitHub ↗
+            </a>
+
+            <a class="button secondary" href="/#architecture-breakdown">
+              ← Back to Architecture Breakdown
+            </a>
+          </div>
+        </section>
+      </article>
+    </main>
+
+    <footer class="site-footer">
+      <span> Architecture Breakdown · Company 01 </span>
+
+      <span> Built by Hema </span>
+    </footer>
+  </body>
+</html>

@@ -9,8 +9,9 @@ The goal of this portfolio is to showcase my skills in cloud engineering and Dev
 ## 2. Target Audience
 
 This portfolio is designed for:
-- Recruiters 
-- Hiring Managers 
+
+- Recruiters
+- Hiring Managers
 - Cloud / DevOps teams
 
 ---
@@ -20,12 +21,14 @@ This portfolio is designed for:
 The portfolio follows a clean and minimal design inspired by modern developer portfolios.
 
 Key design principles:
+
 - Simplicity and readability
 - Mobile responsiveness
 - Structured navigation
 - Interactive UI elements
 
 Sections included:
+
 - About
 - Experience
 - Projects
@@ -36,13 +39,16 @@ Sections included:
 ## 4. Technology Stack
 
 Application Layer:
+
 - Vite
 - HTML, CSS, JavaScript
 
 Version Control:
+
 - GitHub
 
 Deployment:
+
 - AWS Amplify
 
 ---
@@ -52,6 +58,7 @@ Deployment:
 The portfolio is deployed using AWS Amplify with GitHub integration.
 
 Deployment flow:
+
 1. Code is pushed to GitHub
 2. AWS Amplify detects changes
 3. Build process runs (`npm run build`)
@@ -60,6 +67,7 @@ Deployment flow:
 6. Application is served via a global CDN
 
 This enables:
+
 - Continuous Integration and Deployment (CI/CD)
 - Automatic updates on code changes
 - Scalable and reliable hosting

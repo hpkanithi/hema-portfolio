@@ -1,12 +1,13 @@
-import './style.css'
+import "./style.css";
 
-document.querySelector('#app').innerHTML = `
+document.querySelector("#app").innerHTML = `
   <header class="site-header">
     <div class="logo">Hema</div>
     <nav class="nav">
       <a href="#intro">Intro</a>
       <a href="#experience">Experience</a>
       <a href="#projects">Projects</a>
+      <a href="#architecture-breakdown">Architecture</a>
       <a href="#contact">Contact</a>
     </nav>
   </header>
@@ -28,6 +29,7 @@ document.querySelector('#app').innerHTML = `
           <div class="hero-actions">
             <a href="#projects" class="button primary-button">View Projects</a>
             <a href="#experience" class="button secondary-button">View Experience</a>
+            <a href="#architecture-breakdown" class="button secondary-button">View Architecture Blog</a>
           </div>
         </div>
 
@@ -154,6 +156,66 @@ document.querySelector('#app').innerHTML = `
       </div>
     </section>
 
+    <section id="architecture-breakdown" class="section architecture-breakdown-section">
+      <div class="section-content">
+
+        <p class="eyebrow">Architecture Breakdown</p>
+        <h2>Architecture Breakdown</h2>
+
+        <p class="section-description">
+          Rebuilding real-world engineering architectures at portfolio scale,
+          exploring design decisions, failure scenarios, and infrastructure tradeoffs.
+        </p>
+
+        <div class="architecture-grid">
+
+          <!-- Company 01: Slack -->
+          <article class="architecture-card">
+
+            <div class="architecture-card-image">
+              <img
+                src="/assets/architecture/slack/architecture-diagram.svg"
+                alt="Slack job queue architecture recreated on AWS"
+              />
+
+              <span class="architecture-company-label">
+                Company 01 · Slack
+              </span>
+            </div>
+
+            <div class="architecture-card-content">
+
+              <h3>
+                Building Slack's Job Queue Pattern, on a $5 AWS Bill
+              </h3>
+
+              <p class="architecture-tech">
+                AWS · Terraform · ECS · SQS · Redis · CloudWatch
+              </p>
+
+              <p class="architecture-summary">
+                Rebuilt Slack's durable job queue pattern using ECS, SQS,
+                Redis, a dead-letter queue, and CloudWatch, then tested
+                worker failure to prove queued messages survive downtime.
+              </p>
+
+              <div class="architecture-links">
+                <a
+                  href="/company1.html"
+                  class="button secondary-button"
+                >
+                  Read Full Article
+                </a>
+              </div>
+
+            </div>
+          </article>
+
+        </div>
+
+      </div>
+    </section>
+
     <section id="contact" class="section">
       <div class="section-content contact-content">
         <p class="eyebrow">Contact</p>
@@ -221,4 +283,4 @@ document.querySelector('#app').innerHTML = `
       </div>
     </section>
   </main>
-`
+`;

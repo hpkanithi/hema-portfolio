@@ -151,7 +151,9 @@ h3 {
   padding: 0.9rem 1.4rem;
   border-radius: 999px;
   font-weight: 600;
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
 }
 
 .button:hover {
@@ -203,7 +205,9 @@ h3 {
   border: 1px solid rgba(148, 163, 184, 0.15);
   border-radius: 20px;
   background: rgba(15, 23, 42, 0.65);
-  transition: transform 0.2s ease, border 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    border 0.2s ease;
 }
 
 .info-card:first-child {
@@ -289,7 +293,9 @@ h3 {
   background: rgba(15, 23, 42, 0.65);
   color: #e2e8f0;
   text-decoration: none;
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .contact-button:hover .contact-icon {
@@ -328,4 +334,142 @@ h3 {
   background: rgba(59, 130, 246, 0.15);
   border-color: rgba(59, 130, 246, 0.5);
   transform: translateY(-2px);
+}
+
+.architecture-breakdown-section {
+  padding-top: 80px;
+  padding-bottom: 80px;
+}
+
+.architecture-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 36px;
+}
+
+.architecture-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  background: rgba(10, 16, 31, 0.75);
+  border: 1px solid #26324a;
+  border-radius: 20px;
+
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.architecture-card:hover {
+  transform: translateY(-6px);
+  border-color: #4a5d80;
+
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
+}
+
+.architecture-card-image {
+  position: relative;
+
+  width: 100%;
+  height: 220px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  background: rgba(5, 10, 22, 0.85);
+  border-bottom: 1px solid #26324a;
+}
+
+.architecture-card-image img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
+
+  padding: 18px;
+
+  transition: transform 0.3s ease;
+}
+
+.architecture-card:hover .architecture-card-image img {
+  transform: scale(1.03);
+}
+
+.architecture-company-label {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+
+  padding: 6px 10px;
+
+  background: rgba(5, 10, 22, 0.9);
+  border: 1px solid #33415f;
+  border-radius: 20px;
+
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.architecture-card-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+
+  padding: 22px;
+}
+
+.architecture-card-content h3 {
+  margin: 0 0 12px;
+
+  font-size: 21px;
+  line-height: 1.35;
+}
+
+.architecture-tech {
+  margin: 0 0 16px;
+
+  font-size: 13px;
+  color: #9cbcf5;
+  line-height: 1.5;
+}
+
+.architecture-summary {
+  margin: 0 0 22px;
+
+  font-size: 15px;
+  line-height: 1.65;
+
+  color: #c6ccda;
+}
+
+.architecture-links {
+  margin-top: auto;
+}
+
+.architecture-links .button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  text-decoration: none;
+}
+
+@media (max-width: 1000px) {
+  .architecture-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 650px) {
+  .architecture-grid {
+    grid-template-columns: 1fr;
+  }
 }
