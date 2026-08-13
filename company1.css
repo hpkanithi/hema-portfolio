@@ -883,9 +883,7 @@ p code,
   }
 }
 
-/* =========================================================
-   FAILURE TESTING — FINAL LAYOUT OVERRIDE
-   ========================================================= */
+
 
 /* Let the failure-testing section use more horizontal space */
 #failures {
